@@ -1,20 +1,24 @@
-# This is a basic workflow that is manually triggered
+name: Get Filename from GitHub API
 
-name: Auto workflow
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
-on:
+on: 
   workflow_dispatch:
-    
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  # This workflow contains a single job called "greet"
-  check_nc:
-    runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+jobs:
+  get-filenames:
+    runs-on: ubuntu-latest
     steps:
-    # Runs a single command using the runners shell
-        - name: Validating
-          run: echo "Hello ${{ env.filename }}"
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Get filenames using curl and store in a variable
+        id: get_filenames
+        run: |
+          response=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/stevenquitugua/Documentation/contents/)
+          echo "$response" | jq '.[].name' > filenames.txt
+          echo "Filenames:"
+          cat filenames.txt
+
+      - name: Use the curl output in another step
+        run: |
+          echo "Processing filenames from the API response:"
+          cat filenames.txt
