@@ -14,11 +14,12 @@ jobs:
         id: get_filenames
         run: |
           response=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/stevenquitugua/Documentation/contents/)
-          echo "$response" | jq '.[].name' > filenames.txt
-          echo "Filenames:"
+          # Filter out specific filenames (e.g., README.md and .gitignore)
+          echo "$response" | jq '[.[] | select(.name != "README.md" and .name != ".gitignore" and .name != ".github")] | .[].name' > filenames.txt
+          echo "Filtered Filenames:"
           cat filenames.txt
 
       - name: Use the curl output in another step
         run: |
-          echo "Processing filenames from the API response:"
+          echo "Processing filenames from the filtered API response:"
           cat filenames.txt
