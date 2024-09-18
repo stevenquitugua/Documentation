@@ -1,6 +1,8 @@
-# Documentation
+# 🍕🍕Documentation
 
-Any type of documentation accepted
+---
+**SCOPE:**
+> Personal or Technical documentation welcomed
 
 &rarr; Each document should follow this convention:
 
