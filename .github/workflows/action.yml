@@ -10,12 +10,19 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
+      - name: Install jq
+        run: sudo apt-get install jq
+
       - name: Get filenames using curl and store in a variable
         id: get_filenames
         run: |
-          response=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/stevenquitugua/Documentation/contents/)
-          # Filter out specific filenames (e.g., README.md and .gitignore)
-          echo "$response" | jq '[.[] | select(.name != "README.md" and .name != ".gitignore" and .name != ".github")] | .[].name' > filenames.txt
+          response=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/stevenquitugua/Documentation/contents/ || { echo "Curl failed"; exit 1; })
+          exclude_files=("README.md" ".gitignore" ".github")
+          echo "$response" | jq --argjson exclude_files '["README.md", ".gitignore", ".github"]' '[.[] | select((.name as $name | $exclude_files | index($name)) | not)] | .[].name' > filenames.txt
+          if [ ! -s filenames.txt ]; then
+            echo "No filenames found or filtering failed!"
+            exit 1
+          fi
           echo "Filtered Filenames:"
           cat filenames.txt
 
